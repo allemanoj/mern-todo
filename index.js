@@ -1,5 +1,6 @@
 const express = require('express');
 const { createTodo, updateTodo } = require('./types');
+const { todo } = require('./db');
 const app = express();
 
 app.use(express.json());
@@ -10,7 +11,7 @@ app.use(express.json());
  * description: string
  * }
  */
-app.post("/todo",function(req,res){
+app.post("/todo", async function(req,res){
     const createdPayload = req.body;
     const parsedPayload = createTodo.safeParse(createdPayload);
     if(!parsedPayload.success) {
@@ -20,11 +21,22 @@ app.post("/todo",function(req,res){
         return;
     }
     // create todo in mongoDb
+    await todo.create({
+        title:createdPayload.title,
+        description:createdPayload.description,
+        completd:false
+    })
+    res.json({
+        msg:"ToDo is Created"
+    })
 })
-app.get("todos",function(req,res){
-
+app.get("todos", async function(req,res){
+     const response = await todo.find({})
+     res.json({
+        response
+     })
 })
-app.put("/completed",function(req,res){
+app.put("/completed", async function(req,res){
     const updatePayload = req.body;
     const parsedPayload = updateTodo.safeParse(updatePayload);
     if(!parsedPayload.success) {
@@ -33,6 +45,14 @@ app.put("/completed",function(req,res){
         })
         return;
     }
+     await todo.update({
+        _id:req.body.id
+     },{
+        completd:true
+     })
+     res.json({
+        msg:"Todo is completed!!"
+     })
 })
 
 app.listen({

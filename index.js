@@ -55,6 +55,6 @@ app.put("/completed", async function(req,res){
      })
 })
 
-app.listen({
-   msg:"Server is running"
-},3000);
+app.listen(3000,()=>{
+    console.log("server is Running on port");
+});
